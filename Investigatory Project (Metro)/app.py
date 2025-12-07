@@ -1,26 +1,22 @@
 import streamlit as st
-from dmrc_logic import get_all_stations, get_route_and_fare
+from dmrc_logic import (
+    get_all_stations,
+    get_route_and_fare,
+    build_route_figure,
+)
 
-# ----------------------------
-# Title & Description
-# ----------------------------
+
 st.title("DMRC Metro Route & Fare Finder 🚇")
 st.write(
     """
     Choose your source and destination metro stations 
-    to view the suggested route and estimated fare.
+    to view the suggested route, fare, and route map.
     """
 )
 
-# ----------------------------
-# Load station list
-# ----------------------------
-stations = get_all_stations()
-stations = sorted(stations)
+# -------- Station selection --------
+stations = sorted(get_all_stations())
 
-# ----------------------------
-# UI: Station selection
-# ----------------------------
 col1, col2 = st.columns(2)
 
 with col1:
@@ -29,16 +25,13 @@ with col1:
 with col2:
     destination = st.selectbox("Destination station", stations)
 
-# ----------------------------
-# Button: Find Route
-# ----------------------------
 if st.button("Find Route"):
     if source == destination:
         st.warning("Source and destination are same. Please choose different stations.")
     else:
         route, fare = get_route_and_fare(source, destination)
 
-        st.subheader("Route")
+        st.subheader("Route (stations)")
         st.write(" ➜ ".join(route))
 
         st.subheader("Estimated Fare")
@@ -46,3 +39,8 @@ if st.button("Find Route"):
 
         st.subheader("Journey Summary")
         st.write(f"Total stations: {len(route)}")
+
+        # use your original-style full map
+        fig = build_route_figure(route, source, destination)
+        st.subheader("Route Map")
+        st.pyplot(fig)
